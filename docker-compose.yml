@@ -1,0 +1,70 @@
+services:
+    car-app:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile
+        image: php:8.3-fpm
+        container_name: laravel_car_app
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        ports:
+            - "8998:8998"
+        networks:
+            - laravel_network
+        depends_on:
+            - db
+        environment:
+            - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+            - PHP_OPCACHE_MAX_ACCELERATED_FILES=10000
+
+    webserver:
+        image: nginx:latest
+        container_name: nginx_car_app
+        restart: unless-stopped
+        ports:
+            - "2424:80"
+        volumes:
+            - ./:/var/www/html
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+        networks:
+            - laravel_network
+        depends_on:
+            - car-app
+
+    db:
+        image: mariadb:latest
+        container_name: mariadb_car_app
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: car_parts
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+        networks:
+            - laravel_network
+        volumes:
+            - dbdata:/var/lib/mysql
+            - /opt/homebrew/var/www/knoll-bonus-calculation/knoll_live.sql:/docker-entrypoint-initdb.d/knoll_live.sql
+
+    phpmyadmin:
+        image: phpmyadmin:latest
+        container_name: phpmyadmin_car_app
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - "2525:80"
+        depends_on:
+            - db
+        networks:
+            - laravel_network
+
+networks:
+    laravel_network:
+        driver: bridge
+
+volumes:
+    dbdata:
