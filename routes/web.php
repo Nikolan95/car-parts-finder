@@ -12,4 +12,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('user.regist
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
+
+    Route::post('/getVehicleInfo', [DashboardController::class, 'getVehicleInfo'])->name('vehicle.info');
 });
