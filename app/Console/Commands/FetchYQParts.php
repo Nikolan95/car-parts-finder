@@ -28,6 +28,11 @@ class FetchYQParts extends Command
                 if ($link['action'] === 'getGroupParts') {
                     $parts = $this->getGroupParts($link['token']);
                     if (!empty($parts)) {
+//                        dd($parts);
+                        foreach ($parts['categories'][0]['units'] as $part) {
+                            dd($part['unit']);
+                            $data[$groupName][] = $part['unit']['name'];
+                        }
                         $data[$groupName][] = $parts;
                     }
                 }
